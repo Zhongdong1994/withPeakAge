@@ -40,8 +40,8 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=1000;
-        int thresholdOfJob=5;
+        double Time=2000;
+        int thresholdOfJob=2;
         int thresholdOfRequest=5;
         double timeInterval=0.001;
 
@@ -341,10 +341,8 @@ public class TwoQueue {
                          RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          requestWaitingNum.add(RQI);
-                         continue label;
                      } else {
                          Time=Time+timeInterval;
-                         continue label;
                      }
 
              }
