@@ -41,7 +41,8 @@ public class TwoQueue {
 
 
         double Time=20000;
-        int threshold=1;
+        int thresholdOfJob=5;
+        int thresholdOfRequest=5;
         double timeInterval=0.001;
 
         double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/3d,requestServiceRate=1d;
@@ -60,7 +61,7 @@ public class TwoQueue {
         }
 
 
-        double[] returnArray= findAvgTime(jobs, jobs.length,request,request.length,threshold,timeInterval,Time);
+        double[] returnArray= findAvgTime(jobs, jobs.length,request,request.length, thresholdOfJob, thresholdOfRequest,timeInterval,Time);
         return returnArray;
 
 
@@ -68,7 +69,7 @@ public class TwoQueue {
 
 
 
-    static double[] findAvgTime(Jobs jobs1[], int n, Jobs request2[], int m, int threshold,double timeInterval, double originalTime) throws IOException {
+    static double[] findAvgTime(Jobs jobs1[], int n, Jobs request2[], int m, int thresholdOfJob, int thresholdOfRequest,double timeInterval, double originalTime) throws IOException {
         double[] returnArray= new double[8];
         ArrayList<Integer> jobWaitingNum=new ArrayList<Integer>();
         ArrayList<Integer> requestWaitingNum=new ArrayList<Integer>();
@@ -79,7 +80,7 @@ public class TwoQueue {
         double requestWaitingTime2[]=new double[m], requestSystemTime2[]=new double[m],requestFinishTime2[]=new double[m],requestPeakAge[]=new double[m];
         double requestTotalWaitingTime2 = 0, requestTotalSystemTime2 = 0,requestTotalPeakAge=0;
 
-        findWaitingTime(jobs1,jobWaitingTime1,jobFinishTime1,request2,requestWaitingTime2,requestFinishTime2,threshold,timeInterval,
+        findWaitingTime(jobs1,jobWaitingTime1,jobFinishTime1,request2,requestWaitingTime2,requestFinishTime2, thresholdOfJob, thresholdOfRequest,timeInterval,
                 jobWaitingNum,requestWaitingNum,originalTime);
         findSystemTime(jobs1,n,jobWaitingTime1,jobSystemTime1,request2,m,requestWaitingTime2,requestSystemTime2);
         findJobPeakAge(jobs1, n, jobWaitingTime1,jobSystemTime1,jobPeakAge);
@@ -225,10 +226,11 @@ public class TwoQueue {
 
     static void findWaitingTime(Jobs jobs1[], double jobWaitingTime1[],double jobFinishTime1[],
                                 Jobs request2[], double requestWaitingTime2[],double requestFinishTime2[],
-                                int threshold, double timeInterval, ArrayList jobWaitingNum, ArrayList requestWaitingNum, double originalTime) {
+                                int thresholdOfJob, int thresholdOfRequest, double timeInterval, ArrayList jobWaitingNum, ArrayList requestWaitingNum, double originalTime) {
 
         int RQI = 0, JQI=0;
         int currentJob = 0, currentRequest = 0;
+        int preJob=-1, preRequest=-1;
         double Time = 0, finishTime = 0;
         boolean checkJobQueue = false;
         boolean checkRequestQueue = false;
@@ -262,7 +264,9 @@ public class TwoQueue {
                              currentRequest = requestQueueInfo(request2, requestServiceTime2, Time)[0];
                              if (currentRequest < request2.length) {
                                  RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
-                                 if (RQI >= threshold) {
+                                 if (RQI >= thresholdOfRequest&&currentRequest>preRequest) {
+                                     value=2;
+                                     preRequest=currentRequest;
                                      continue label;
                                  } else {
                                      jobServiceTime1[currentJob] = jobServiceTime1[currentJob] - timeInterval;
@@ -283,61 +287,54 @@ public class TwoQueue {
                          RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          jobWaitingNum.add(JQI);
-
-
                      } else {
-
-                         do {
-
-                             for (int i = 0; i < request2.length; i++) {
-                                 if ((request2[i].jobArrivalTime <= Time) &&
-                                         requestServiceTime2[i] > 0) {
-                                     currentRequest = i;
-                                     checkRequestQueue = true;
-                                     break;
-                                 }
-                             }
-                             if (checkRequestQueue) {
-
-                                 Time = Time + requestServiceTime2[currentRequest];
-                                 requestServiceTime2[currentRequest] = -1;
-
-
-                                 finishTime = Time;
-                                 requestFinishTime2[currentRequest] = finishTime;
-                                 requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
-
-                                 checkRequestQueue = false;
-                                 RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
-                                 requestWaitingNum.add(RQI);
-
-                             } else {
-                                 Time = Time + timeInterval;
-
-                             }
-                         } while (RQI > 0);
-
-
+                         Time=Time+timeInterval;
                      }
 
                  case 2:
-                     currentRequest = requestQueueInfo(request2, requestServiceTime2, Time)[0];
+                     for (int i = 0; i < request2.length; i++) {
+                         if ((request2[i].jobArrivalTime <= Time) &&
+                                 requestServiceTime2[i] > 0) {
+                             currentRequest = i;
+                             checkRequestQueue = true;
+                             break;
+                         }
+                     }
+                     if (checkRequestQueue) {
+                         double localTime = 0;
+                         while (localTime < request2[currentRequest].jobServiceTime && requestServiceTime2[currentRequest] > 0) {
+                             Time = Time + timeInterval;
+                             localTime = localTime + timeInterval;
+                             currentJob = jobQueueInfo(jobs1,jobServiceTime1,Time)[0];
+                             if (currentJob < jobs1.length) {
+                                 JQI = jobQueueInfo(jobs1,jobServiceTime1,Time)[2];
+                                 if (JQI >= thresholdOfJob&&currentJob>preJob) {
+                                     value=1;
+                                     preJob=currentJob;
+                                     continue label;
+                                 } else {
+                                     requestServiceTime2[currentRequest] = requestServiceTime2[currentRequest] - timeInterval;
+                                 }
+                             } else {
+                                 break;
+                             }
+                         }
 
-                     while (RQI > 0) {
-
-                         Time = Time + requestServiceTime2[currentRequest];
                          requestServiceTime2[currentRequest] = -1;
-
 
                          finishTime = Time;
                          requestFinishTime2[currentRequest] = finishTime;
                          requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
 
-                         currentRequest++;
-                         RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
-                         requestWaitingNum.add(RQI);
 
+                         checkRequestQueue = false;
+                         RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
+                         JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
+                         requestWaitingNum.add(RQI);
+                     } else {
+                         Time=Time+timeInterval;
                      }
+
              }
             }
 
