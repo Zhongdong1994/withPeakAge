@@ -246,8 +246,8 @@ public class TwoQueue {
         loop:while (Time<originalTime) {
 
 
-            if (RQI < threshold) {
-                for (int i = 0; i < jobs1.length; i++) {
+            if (RQI < threshold) {                                                          //when the threshold is NOT reached
+                for (int i = 0; i < jobs1.length; i++) {                                    //examine weather the latest UNserved job exist or not
                     if ((jobs1[i].jobArrivalTime <= Time) &&
                             jobServiceTime1[i] > 0) {
                         currentJob = i;
@@ -255,7 +255,7 @@ public class TwoQueue {
                         break;
                     }
                 }
-                if (checkJobQueue) {
+                if (checkJobQueue) {                                                        //if there is an UNserved job waiting
                     double localTime=0;
                     while(localTime<jobs1[currentJob].jobServiceTime && jobServiceTime1[currentJob] > 0){
                         Time=Time+timeInterval;
@@ -286,11 +286,11 @@ public class TwoQueue {
                     jobWaitingNum.add(JQI);
 
 
-                } else {
+                } else {                                                                          //there is no UNserved job waiting
 
                     do{
 
-                        for (int i = 0; i < request2.length; i++) {
+                        for (int i = 0; i < request2.length; i++) {                               //examine weather the latest UNserved request exist or not
                             if ((request2[i].jobArrivalTime <= Time) &&
                                     requestServiceTime2[i] > 0) {
                                 currentRequest = i;
@@ -298,7 +298,7 @@ public class TwoQueue {
                                 break;
                             }
                         }
-                        if (checkRequestQueue) {
+                        if (checkRequestQueue) {                                                   //if there is an  UNserved request waiting
 
                             Time = Time + requestServiceTime2[currentRequest];
                             requestServiceTime2[currentRequest]=-1;
@@ -312,7 +312,7 @@ public class TwoQueue {
                             RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
                             requestWaitingNum.add(RQI);
 
-                        } else {
+                        } else {                                                                   //no waiting jobs and no waiting requests, time++
                             Time = Time + timeInterval;
 
                         }
@@ -321,7 +321,7 @@ public class TwoQueue {
 
 
                 }
-            } else{
+            } else{                                                                                //when the threshold is reached
                 currentRequest=requestQueueInfo(request2,requestServiceTime2, Time)[0];
 
                 while (RQI>0){
