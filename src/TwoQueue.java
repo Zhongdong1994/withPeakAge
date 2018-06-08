@@ -40,7 +40,7 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=20000;
+        double Time=1000;
         int thresholdOfJob=5;
         int thresholdOfRequest=5;
         double timeInterval=0.001;
@@ -244,7 +244,15 @@ public class TwoQueue {
             requestServiceTime2[i] = request2[i].jobServiceTime;
         }
 
-        int value=1;
+        int value;
+        if(jobs1[0].jobArrivalTime<request2[0].jobArrivalTime){
+            value=1;
+        }else {
+            value=2;
+        }
+
+
+
         label: while (Time<originalTime) {
              switch (value) {
                  case 1: // Serve jobQueue first
@@ -287,8 +295,10 @@ public class TwoQueue {
                          RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          jobWaitingNum.add(JQI);
+                         continue label;
                      } else {
                          Time=Time+timeInterval;
+                         continue label;
                      }
 
                  case 2:
@@ -331,8 +341,10 @@ public class TwoQueue {
                          RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          requestWaitingNum.add(RQI);
+                         continue label;
                      } else {
                          Time=Time+timeInterval;
+                         continue label;
                      }
 
              }
