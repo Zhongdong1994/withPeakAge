@@ -9,10 +9,10 @@ public class TwoQueue {
         int computationNum=10;
         File  FinalInfo=new File("FinalInfo.txt");
         FileWriter out0= new FileWriter(FinalInfo);
-        double[]  matrix= new double[8];
+        double[]  matrix= new double[10];
         for(int i=0;i<computationNum;i++){
             double[] returnArray=twoQueue();
-            for(int j=0;j<8;j++){
+            for(int j=0;j<10;j++){
                 matrix[j]=matrix[j]+returnArray[j];
             }
             System.out.println(i);
@@ -26,6 +26,8 @@ public class TwoQueue {
         out0.write(matrix[2]/computationNum+"\t");
         System.out.println("jobAvgPeakAge: "+matrix[6]/computationNum);
         out0.write(matrix[6]/computationNum+"\t");
+        System.out.println("jobAvgAge: "+matrix[8]/computationNum);
+        out0.write(matrix[8]/computationNum+"\t");
         System.out.println("requestAvgWaitingTime: "+matrix[3]/computationNum);
         out0.write(matrix[3]/computationNum+"\t");
         System.out.println("requestAvgSystemTime: "+matrix[4]/computationNum);
@@ -34,13 +36,15 @@ public class TwoQueue {
         out0.write(matrix[5]/computationNum+"\t");
         System.out.println("requestAvgPeakAge: "+matrix[7]/computationNum);
         out0.write(matrix[7]/computationNum+"");
+        System.out.println("requestAvgAge: "+matrix[9]/computationNum);
+        out0.write(matrix[9]/computationNum+"\t");
         out0.close();
 
     }
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=20000;
+        double Time=1000;
         int thresholdOfJob=100;
         int thresholdOfRequest=2;
         double timeInterval=0.001;
@@ -70,29 +74,33 @@ public class TwoQueue {
 
 
     static double[] findAvgTime(Jobs jobs1[], int n, Jobs request2[], int m, int thresholdOfJob, int thresholdOfRequest,double timeInterval, double originalTime) throws IOException {
-        double[] returnArray= new double[8];
+        double[] returnArray= new double[10];
         ArrayList<Integer> jobWaitingNum=new ArrayList<Integer>();
         ArrayList<Integer> requestWaitingNum=new ArrayList<Integer>();
 
-        double jobWaitingTime1[]=new double[n], jobSystemTime1[]=new double[n],jobFinishTime1[]=new double[n],jobPeakAge[]=new double[n];
-        double jobTotalWaitingTime1 = 0, jobTotalSystemTime1 = 0,jobTotalPeakAge=0;
+        double jobWaitingTime1[]=new double[n], jobSystemTime1[]=new double[n],jobFinishTime1[]=new double[n],jobPeakAge[]=new double[n],jobAge[]=new double[n];
+        double jobTotalWaitingTime1 = 0, jobTotalSystemTime1 = 0,jobTotalPeakAge=0,jobTotalAge=0;
 
-        double requestWaitingTime2[]=new double[m], requestSystemTime2[]=new double[m],requestFinishTime2[]=new double[m],requestPeakAge[]=new double[m];
-        double requestTotalWaitingTime2 = 0, requestTotalSystemTime2 = 0,requestTotalPeakAge=0;
+        double requestWaitingTime2[]=new double[m], requestSystemTime2[]=new double[m],requestFinishTime2[]=new double[m],requestPeakAge[]=new double[m],requestAge[]=new double[m];
+        double requestTotalWaitingTime2 = 0, requestTotalSystemTime2 = 0,requestTotalPeakAge=0,requestTotalAge=0;
 
         findWaitingTime(jobs1,jobWaitingTime1,jobFinishTime1,request2,requestWaitingTime2,requestFinishTime2, thresholdOfJob, thresholdOfRequest,timeInterval,
                 jobWaitingNum,requestWaitingNum,originalTime);
         findSystemTime(jobs1,n,jobWaitingTime1,jobSystemTime1,request2,m,requestWaitingTime2,requestSystemTime2);
         findJobPeakAge(jobs1, n, jobWaitingTime1,jobSystemTime1,jobPeakAge);
         findRequestPeakAge(request2,m,requestWaitingTime2,requestSystemTime2,requestPeakAge);
+        findJobAge(jobs1,n,jobFinishTime1,jobAge,jobWaitingTime1);
+        findRequestAge(request2,m,requestFinishTime2,requestAge,requestWaitingTime2);
 
 
         File jobTotalWaitingTimeFile=new File("jobTotalWaitingTime.txt");
         File jobTotalSystemTimeFile=new File("jobTotalSystemTime.txt");
         File jobTotalPeakAgeFile=new File("jobTotalPeakAge.txt");
+        File jobTotalAgeFile=new File("jobTotalAge.txt");
         FileWriter out1 = new FileWriter(jobTotalWaitingTimeFile);
         FileWriter out2 = new FileWriter(jobTotalSystemTimeFile);
         FileWriter out3 = new FileWriter(jobTotalPeakAgeFile);
+        FileWriter out30=new FileWriter(jobTotalAgeFile);
 
         int noneZeroCounter=0;
         for (int i = 0; i < n; i++)
@@ -106,10 +114,13 @@ public class TwoQueue {
             out2.write(jobSystemTime1[i]+"\t");
             jobTotalPeakAge=jobTotalPeakAge+jobPeakAge[i];
             out3.write(jobPeakAge[i]+"\t");
+            jobTotalAge=jobTotalAge+jobAge[i];
+            out30.write(jobAge[i]+"\t");
         }
         out1.close();
         out2.close();
         out3.close();
+        out30.close();
 
 
 
@@ -120,6 +131,8 @@ public class TwoQueue {
         returnArray[1]=jobAvgSystemTime;
         double jobAvgPeakAge=jobTotalPeakAge/noneZeroCounter;
         returnArray[6]=jobAvgPeakAge;
+        double jobAvgAge=jobTotalAge/noneZeroCounter;
+        returnArray[8]=jobAvgAge;
 
 
 
@@ -143,9 +156,11 @@ public class TwoQueue {
         File requestTotalWaitingTimeFile=new File("requestTotalWaitingTime.txt");
         File requestTotalSystemTimeFile=new File("requestTotalSystemTime.txt");
         File requestTotalPeakAgeFile=new File("requestTotalPeakAge.txt");
+        File reqeustTotalAgeFile=new File("requestTotalAge.txt");
         FileWriter out5 = new FileWriter(requestTotalWaitingTimeFile);
         FileWriter out6 = new FileWriter(requestTotalSystemTimeFile);
         FileWriter out8=new FileWriter(requestTotalPeakAgeFile);
+        FileWriter out80= new FileWriter(reqeustTotalAgeFile);
 
         int noneZeroCounter2=0;
         for (int i = 0; i < m; i++)
@@ -159,10 +174,13 @@ public class TwoQueue {
             out6.write(requestSystemTime2[i]+"\t");
             requestTotalPeakAge=requestTotalPeakAge+requestPeakAge[i];
             out8.write(requestPeakAge[i]+"\t");
+            requestTotalAge=requestTotalAge+requestAge[i];
+            out80.write(requestAge[i]+"\t");
         }
         out5.close();
         out6.close();
         out8.close();
+        out80.close();
 
 
 
@@ -172,6 +190,8 @@ public class TwoQueue {
         returnArray[4]=requestAvgSystemTime;
         double requestAvgPeakAge=requestTotalPeakAge/noneZeroCounter2;
         returnArray[7]=requestAvgPeakAge;
+        double requestAvgAge=requestTotalAge/noneZeroCounter2;
+        returnArray[9]=requestAvgAge;
 
         File requestWaitingNumFile=new File("requestWaitingNum.txt");
         FileWriter out7= new FileWriter(requestWaitingNumFile);
@@ -220,6 +240,22 @@ public class TwoQueue {
         for(int i=1;i<m;i++){
             if(requestWaitingTime2[i]>0){
                 requestPeakAge[i]=requestSystemTime2[i]+(request2[i].jobArrivalTime-request2[i-1].jobArrivalTime);
+            }
+        }
+    }
+
+    static void findJobAge(Jobs jobs1[],int n, double jobFinishTime[],double jobAge[],double jobWaitingTime[]){
+        for(int i=1;i<n;i++){
+            if(jobWaitingTime[i]>0){
+                jobAge[i]=0.5*(jobs1[i].jobArrivalTime-jobs1[i-1].jobArrivalTime)*(2*jobFinishTime[i]-jobs1[i].jobArrivalTime-jobs1[i-1].jobArrivalTime);
+            }
+        }
+    }
+
+    static void findRequestAge(Jobs request[], int m, double requestFinishTime[],double requestAge[],double requestWaitingTime[]){
+        for(int i=1;i<m;i++){
+            if(requestWaitingTime[i]>0){
+                requestAge[i]=0.5*(request[i].jobArrivalTime-request[i-1].jobArrivalTime)*(2*requestFinishTime[i]-request[i].jobArrivalTime-request[i-1].jobArrivalTime);
             }
         }
     }
