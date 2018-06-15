@@ -41,8 +41,8 @@ public class TwoQueue {
 
 
         double Time=2000;
-        int thresholdOfJob=2;
-        int thresholdOfRequest=5;
+        int thresholdOfJob=5;
+        int thresholdOfRequest=6;
         double timeInterval=0.001;
 
         double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/3d,requestServiceRate=1d;
@@ -275,6 +275,7 @@ public class TwoQueue {
                                  if (RQI >= thresholdOfRequest&&currentRequest>preRequest) {
                                      value=2;
                                      preRequest=currentRequest;
+                                     checkJobQueue=false;
                                      continue label;
                                  } else {
                                      jobServiceTime1[currentJob] = jobServiceTime1[currentJob] - timeInterval;
@@ -321,6 +322,7 @@ public class TwoQueue {
                                  if (JQI >= thresholdOfJob&&currentJob>preJob) {
                                      value=1;
                                      preJob=currentJob;
+                                     checkRequestQueue=false;
                                      continue label;
                                  } else {
                                      requestServiceTime2[currentRequest] = requestServiceTime2[currentRequest] - timeInterval;
