@@ -40,9 +40,9 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=2000;
-        int thresholdOfJob=5;
-        int thresholdOfRequest=6;
+        double Time=20000;
+        int thresholdOfJob=100;
+        int thresholdOfRequest=2;
         double timeInterval=0.001;
 
         double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/3d,requestServiceRate=1d;
@@ -230,6 +230,7 @@ public class TwoQueue {
 
         int RQI = 0, JQI=0;
         int currentJob = 0, currentRequest = 0;
+        int currentJob2 = 0, currentRequest2 = 0;
         int preJob=-1, preRequest=-1;
         double Time = 0, finishTime = 0;
         boolean checkJobQueue = false;
@@ -269,12 +270,12 @@ public class TwoQueue {
                          while (localTime < jobs1[currentJob].jobServiceTime && jobServiceTime1[currentJob] > 0) {
                              Time = Time + timeInterval;
                              localTime = localTime + timeInterval;
-                             currentRequest = requestQueueInfo(request2, requestServiceTime2, Time)[0];
-                             if (currentRequest < request2.length) {
+                             currentRequest2= requestQueueInfo(request2, requestServiceTime2, Time)[0];
+                             if (currentRequest2 < requestServiceTime2.length) {
                                  RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
-                                 if (RQI >= thresholdOfRequest&&currentRequest>preRequest) {
+                                 if (RQI >= thresholdOfRequest && currentRequest2>preRequest) {
                                      value=2;
-                                     preRequest=currentRequest;
+                                     preRequest=currentRequest2;
                                      checkJobQueue=false;
                                      continue label;
                                  } else {
@@ -297,7 +298,11 @@ public class TwoQueue {
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          jobWaitingNum.add(JQI);
                          continue label;
-                     } else {
+                     }else if(requestQueueInfo(request2, requestServiceTime2, Time)[2]>0){
+                         value=2;
+                         continue label;
+                     }
+                     else {
                          Time=Time+timeInterval;
                          continue label;
                      }
@@ -316,12 +321,12 @@ public class TwoQueue {
                          while (localTime < request2[currentRequest].jobServiceTime && requestServiceTime2[currentRequest] > 0) {
                              Time = Time + timeInterval;
                              localTime = localTime + timeInterval;
-                             currentJob = jobQueueInfo(jobs1,jobServiceTime1,Time)[0];
-                             if (currentJob < jobs1.length) {
+                             currentJob2 = jobQueueInfo(jobs1,jobServiceTime1,Time)[0];
+                             if (currentJob2 < jobServiceTime1.length) {
                                  JQI = jobQueueInfo(jobs1,jobServiceTime1,Time)[2];
-                                 if (JQI >= thresholdOfJob&&currentJob>preJob) {
+                                 if (JQI >= thresholdOfJob&&currentJob2>preJob) {
                                      value=1;
-                                     preJob=currentJob;
+                                     preJob=currentJob2;
                                      checkRequestQueue=false;
                                      continue label;
                                  } else {
@@ -343,8 +348,14 @@ public class TwoQueue {
                          RQI = requestQueueInfo(request2, requestServiceTime2, Time)[2];
                          JQI = jobQueueInfo(jobs1, jobServiceTime1, Time)[2];
                          requestWaitingNum.add(RQI);
-                     } else {
+                         continue label;
+                     } else if(jobQueueInfo(jobs1,jobServiceTime1,Time)[2]>0){
+                         value=1;
+                         continue label;
+                     }
+                     else {
                          Time=Time+timeInterval;
+                         continue label;
                      }
 
              }
