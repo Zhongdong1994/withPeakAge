@@ -44,11 +44,11 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=1000;
-        int threshold=5;
+        double Time=3000;
+        int threshold=2;
         double timeInterval=0.001;
 
-        double jobArrivalRate=1d, jobServiceRate=3d,requestArrivalRate=1d,requestServiceRate=2d;
+        double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/3d,requestServiceRate=1d;
         ArrayList<Integer> jobIndex=new ArrayList<>(); ArrayList<Double> jobServiceTime=new ArrayList<>();ArrayList<Double> jobBeginTime=new ArrayList<>();
         ArrayList<Integer> requestIndex=new ArrayList<>(); ArrayList<Double> requestServiceTime=new ArrayList<>();ArrayList<Double> requestBeginTime=new ArrayList<>();
         AddJobs.addJobs1(jobArrivalRate,jobServiceRate,jobIndex,jobBeginTime,jobServiceTime,Time);
@@ -265,9 +265,10 @@ public class TwoQueue {
 
         int RQI = 0, JQI=0;
         int currentJob = 0, currentRequest = 0;
-        double Time = 0, finishTime = 0;
+        double Time = 0, finishTime = 0;//preJobFinishTime=0,preRequestFinishTime=0;
         boolean checkJobQueue = false;
         boolean checkRequestQueue = false;
+
 
         double jobServiceTime1[] = new double[jobs1.length];
         for (int i = 0; i < jobs1.length; i++) {
@@ -278,103 +279,57 @@ public class TwoQueue {
             requestServiceTime2[i] = request2[i].jobServiceTime;
         }
 
+        while (Time<originalTime) {
+            //System.out.println(Time);
 
-        loop:while (Time<originalTime) {
-
-
-            if (RQI < threshold) {                                                          //when the threshold is NOT reached
-                for (int i = 0; i < jobs1.length; i++) {                                    //examine weather the latest UNserved job exist or not
-                    if ((jobs1[i].jobArrivalTime <= Time) &&
-                            jobServiceTime1[i] > 0) {
-                        currentJob = i;
-                        checkJobQueue = true;
-                        break;
-                    }
+            for (int i = 0; i < jobs1.length; i++) {                                    //examine weather the latest UNserved job exist or not
+                if ((jobs1[i].jobArrivalTime <= Time) &&
+                        jobServiceTime1[i] > 0) {
+                    currentJob = i;
+                    checkJobQueue = true;
+                    break;
                 }
-                if (checkJobQueue) {                                                        //if there is an UNserved job waiting
-                    double localTime=0;
-                    while(localTime<jobs1[currentJob].jobServiceTime && jobServiceTime1[currentJob] > 0){
-                        Time=Time+timeInterval;
-                        localTime=localTime+timeInterval;
-                        currentRequest=requestQueueInfo(request2,requestServiceTime2, Time)[0];
-                        if(currentRequest<request2.length){
-                            RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
-                            if(RQI >= threshold){
-                                continue loop;
-                            }else {
-                                jobServiceTime1[currentJob]=jobServiceTime1[currentJob]-timeInterval;
-                            }
-                        }else {
-                            break ;
-                        }
-                    }
+            }
 
+            for (int i = 0; i < request2.length; i++) {                               //examine weather the latest UNserved request exist or not
+                if ((request2[i].jobArrivalTime <= Time) &&
+                        requestServiceTime2[i] > 0) {
+                    currentRequest = i;
+                    checkRequestQueue = true;
+                    break;
+                }
+            }
+
+            if(checkJobQueue && checkRequestQueue){
+                if(jobs1[currentJob].jobArrivalTime<request2[currentRequest].jobArrivalTime){
+                    Time=jobs1[currentJob].jobArrivalTime+jobServiceTime1[currentJob];
                     jobServiceTime1[currentJob]=-1;
-
+                    //preJobFinishTime=Time;
                     finishTime = Time;
                     jobFinishTime1[currentJob] = finishTime;
                     jobWaitingTime1[currentJob] = finishTime - jobs1[currentJob].jobArrivalTime - jobs1[currentJob].jobServiceTime;
-
-
                     checkJobQueue = false;
-                    RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
+                    checkRequestQueue = false;
+
+
                     JQI=jobQueueInfo(jobs1,jobServiceTime1,Time)[2];
                     jobWaitingNum.add(JQI);
-
-
-                } else {                                                                          //there is no UNserved job waiting
-
-                    do{
-
-                        for (int i = 0; i < request2.length; i++) {                               //examine weather the latest UNserved request exist or not
-                            if ((request2[i].jobArrivalTime <= Time) &&
-                                    requestServiceTime2[i] > 0) {
-                                currentRequest = i;
-                                checkRequestQueue = true;
-                                break;
-                            }
-                        }
-                        if (checkRequestQueue) {                                                   //if there is an  UNserved request waiting
-
-                            Time = Time + requestServiceTime2[currentRequest];
-                            requestServiceTime2[currentRequest]=-1;
-
-
-                            finishTime = Time;
-                            requestFinishTime2[currentRequest] = finishTime;
-                            requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
-
-                            checkRequestQueue = false;
-                            RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
-                            requestWaitingNum.add(RQI);
-
-                        } else {                                                                   //no waiting jobs and no waiting requests, time++
-                            Time = Time + timeInterval;
-
-                        }
-                    }while(RQI>0);
-
-
-
-                }
-            } else{                                                                                //when the threshold is reached
-                currentRequest=requestQueueInfo(request2,requestServiceTime2, Time)[0];
-
-                while (RQI>0){
-
-                    Time = Time + requestServiceTime2[currentRequest];
+                }else {
+                    Time = request2[currentRequest].jobArrivalTime + requestServiceTime2[currentRequest];
                     requestServiceTime2[currentRequest]=-1;
-
-
+                    //preRequestFinishTime=Time;
                     finishTime = Time;
                     requestFinishTime2[currentRequest] = finishTime;
                     requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
+                    checkRequestQueue = false;
+                    checkJobQueue = false;
 
-                    currentRequest++;
                     RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
                     requestWaitingNum.add(RQI);
-
                 }
+
+            }else {
+                Time = Time + timeInterval;
             }
         }
 
