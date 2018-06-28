@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class TwoQueue {
     public static void main(String[] args) throws IOException {
 
-        int computationNum=30;
+        int computationNum=10;
         File  FinalInfo=new File("FinalInfo.txt");
         FileWriter out0= new FileWriter(FinalInfo);
         double[]  matrix= new double[10];
@@ -44,7 +44,7 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=30000;
+        double Time=100000;
         int threshold=2;
         double timeInterval=0.001;
 
@@ -280,33 +280,56 @@ public class TwoQueue {
         }
 
         while (Time<originalTime) {
-            //System.out.println(Time);
 
                 if(jobs1[currentJob].jobArrivalTime<request2[currentRequest].jobArrivalTime){
-                    Time=jobs1[currentJob].jobArrivalTime+jobServiceTime1[currentJob];
-                    jobServiceTime1[currentJob]=-1;
-                    //preJobFinishTime=Time;
+                    //System.out.println("jobs1["+currentJob+"].jobArrivalTime="+jobs1[currentJob].jobArrivalTime);
+                    //System.out.println("jobServiceTime1["+currentJob+"]="+jobServiceTime1[currentJob]);
+                    if(currentJob==0&&currentRequest==0){
+                        Time=jobs1[currentJob].jobArrivalTime+jobServiceTime1[currentJob];
+                    }else {
+                        if(finishTime>jobs1[currentJob].jobArrivalTime){
+                            Time=finishTime+jobServiceTime1[currentJob];
+                        }else {
+                            Time=jobs1[currentJob].jobArrivalTime+jobServiceTime1[currentJob];
+                        }
+
+                    }
+
                     finishTime = Time;
+                    //System.out.println("finishTime="+finishTime);
                     jobFinishTime1[currentJob] = finishTime;
                     jobWaitingTime1[currentJob] = finishTime - jobs1[currentJob].jobArrivalTime - jobs1[currentJob].jobServiceTime;
-                    checkJobQueue = false;
-                    checkRequestQueue = false;
-                    currentJob++;
+                    //System.out.println("jobWaitingTime1["+currentJob+"]="+jobWaitingTime1[currentJob]);
 
+                    if(currentJob<jobs1.length-1){
+                        currentJob++;
+                    }
 
                     JQI=jobQueueInfo(jobs1,jobServiceTime1,Time)[2];
                     jobWaitingNum.add(JQI);
                 }else {
-                    Time = request2[currentRequest].jobArrivalTime + requestServiceTime2[currentRequest];
-                    requestServiceTime2[currentRequest]=-1;
-                    //preRequestFinishTime=Time;
+                    //System.out.println("request2["+currentRequest+"].jobArrivalTime="+request2[currentRequest].jobArrivalTime);
+                    //System.out.println("requestServiceTime2["+currentRequest+"]="+requestServiceTime2[currentRequest]);
+                    if(currentRequest==0&&currentJob==0){
+                        Time=request2[currentRequest].jobArrivalTime+requestServiceTime2[currentRequest];
+                    }else {
+                        if(finishTime>request2[currentRequest].jobArrivalTime){
+                            Time = finishTime+ requestServiceTime2[currentRequest];
+                        }else {
+                            Time = request2[currentRequest].jobArrivalTime+ requestServiceTime2[currentRequest];
+                        }
+
+                    }
+
                     finishTime = Time;
+                    //System.out.println("finishTime="+finishTime);
                     requestFinishTime2[currentRequest] = finishTime;
                     requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
-                    checkRequestQueue = false;
-                    checkJobQueue = false;
-                    currentRequest++;
+                   // System.out.println("requestWaitingTime2["+currentRequest+"]="+ requestWaitingTime2[currentRequest] );
 
+                    if(currentRequest<request2.length-1){
+                        currentRequest++;
+                    }
                     RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
                     requestWaitingNum.add(RQI);
                 }
