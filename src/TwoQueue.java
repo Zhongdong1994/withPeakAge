@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class TwoQueue {
     public static void main(String[] args) throws IOException {
 
-        int computationNum=10;
+        int computationNum=30;
         File  FinalInfo=new File("FinalInfo.txt");
         FileWriter out0= new FileWriter(FinalInfo);
         double[]  matrix= new double[10];
@@ -44,7 +44,7 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=3000;
+        double Time=30000;
         int threshold=2;
         double timeInterval=0.001;
 
@@ -282,25 +282,6 @@ public class TwoQueue {
         while (Time<originalTime) {
             //System.out.println(Time);
 
-            for (int i = 0; i < jobs1.length; i++) {                                    //examine weather the latest UNserved job exist or not
-                if ((jobs1[i].jobArrivalTime <= Time) &&
-                        jobServiceTime1[i] > 0) {
-                    currentJob = i;
-                    checkJobQueue = true;
-                    break;
-                }
-            }
-
-            for (int i = 0; i < request2.length; i++) {                               //examine weather the latest UNserved request exist or not
-                if ((request2[i].jobArrivalTime <= Time) &&
-                        requestServiceTime2[i] > 0) {
-                    currentRequest = i;
-                    checkRequestQueue = true;
-                    break;
-                }
-            }
-
-            if(checkJobQueue && checkRequestQueue){
                 if(jobs1[currentJob].jobArrivalTime<request2[currentRequest].jobArrivalTime){
                     Time=jobs1[currentJob].jobArrivalTime+jobServiceTime1[currentJob];
                     jobServiceTime1[currentJob]=-1;
@@ -310,6 +291,7 @@ public class TwoQueue {
                     jobWaitingTime1[currentJob] = finishTime - jobs1[currentJob].jobArrivalTime - jobs1[currentJob].jobServiceTime;
                     checkJobQueue = false;
                     checkRequestQueue = false;
+                    currentJob++;
 
 
                     JQI=jobQueueInfo(jobs1,jobServiceTime1,Time)[2];
@@ -323,14 +305,12 @@ public class TwoQueue {
                     requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
                     checkRequestQueue = false;
                     checkJobQueue = false;
+                    currentRequest++;
 
                     RQI = requestQueueInfo(request2,requestServiceTime2, Time)[2];
                     requestWaitingNum.add(RQI);
                 }
 
-            }else {
-                Time = Time + timeInterval;
-            }
         }
 
     }
