@@ -35,7 +35,7 @@ public class TwoQueue {
         System.out.println("requestAvgWaitingNum: "+matrix[5]/computationNum);
         out0.write(matrix[5]/computationNum+"\t");
         System.out.println("requestAvgPeakAge: "+matrix[7]/computationNum);
-        out0.write(matrix[7]/computationNum+"");
+        out0.write(matrix[7]/computationNum+"\t");
         System.out.println("requestAvgAge: "+matrix[9]/computationNum);
         out0.write(matrix[9]/computationNum+"\t");
         out0.close();
@@ -131,7 +131,7 @@ public class TwoQueue {
         returnArray[1]=jobAvgSystemTime;
         double jobAvgPeakAge=jobTotalPeakAge/noneZeroCounter;
         returnArray[6]=jobAvgPeakAge;
-        double jobAvgAge=jobTotalAge/noneZeroCounter;
+        double jobAvgAge=jobTotalAge/originalTime;
         returnArray[8]=jobAvgAge;
 
 
@@ -190,7 +190,7 @@ public class TwoQueue {
         returnArray[4]=requestAvgSystemTime;
         double requestAvgPeakAge=requestTotalPeakAge/noneZeroCounter2;
         returnArray[7]=requestAvgPeakAge;
-        double requestAvgAge=requestTotalAge/noneZeroCounter2;
+        double requestAvgAge=requestTotalAge/originalTime;
         returnArray[9]=requestAvgAge;
 
         File requestWaitingNumFile=new File("requestWaitingNum.txt");
