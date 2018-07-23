@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class TwoQueue {
     public static void main(String[] args) throws IOException {
 
-        int computationNum=10;
+        int computationNum=1;
         File  FinalInfo=new File("FinalInfo.txt");
         FileWriter out0= new FileWriter(FinalInfo);
         double[]  matrix= new double[10];
@@ -44,11 +44,11 @@ public class TwoQueue {
     public static double[] twoQueue() throws IOException {
 
 
-        double Time=100000;
+        double Time=200000;
         int threshold=2;
-        double timeInterval=0.001;
+        double timeInterval=0.0001;
 
-        double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/3d,requestServiceRate=1d;
+        double jobArrivalRate=1/3d, jobServiceRate=1d,requestArrivalRate=1/4d,requestServiceRate=1d;
         ArrayList<Integer> jobIndex=new ArrayList<>(); ArrayList<Double> jobServiceTime=new ArrayList<>();ArrayList<Double> jobBeginTime=new ArrayList<>();
         ArrayList<Integer> requestIndex=new ArrayList<>(); ArrayList<Double> requestServiceTime=new ArrayList<>();ArrayList<Double> requestBeginTime=new ArrayList<>();
         AddJobs.addJobs1(jobArrivalRate,jobServiceRate,jobIndex,jobBeginTime,jobServiceTime,Time);
@@ -104,7 +104,7 @@ public class TwoQueue {
         int noneZeroCounter=0;
         for (int i = 0; i < n; i++)
         {
-            if(jobWaitingTime1[i]>0){
+            if(jobFinishTime1[i]>0){
                 noneZeroCounter++;
             }
             jobTotalWaitingTime1 = jobTotalWaitingTime1+ jobWaitingTime1[i];
@@ -164,7 +164,7 @@ public class TwoQueue {
         int noneZeroCounter2=0;
         for (int i = 0; i < m; i++)
         {
-            if(requestWaitingTime2[i]>0){
+            if(requestFinishTime2[i]>0){
                 noneZeroCounter2++;
             }
             requestTotalWaitingTime2 = requestTotalWaitingTime2+ requestWaitingTime2[i];
@@ -212,50 +212,46 @@ public class TwoQueue {
                                Jobs request2[], int m,double requestWaitingTime2[],double requestSystemTime2[]
     ){
         for(int i=0;i<n;i++){
-            if(jobWaitingTime1[i]>0){
                 jobSystemTime1[i]=jobs1[i].jobServiceTime+jobWaitingTime1[i];
-
-            }
-
         }
         for(int i=0;i<m;i++) {
-            if (requestWaitingTime2[i] > 0) {
                 requestSystemTime2[i] = request2[i].jobServiceTime + requestWaitingTime2[i];
-            }
         }
     }
 
 
     static void findJobPeakAge(Jobs jobs1[], int n, double jobWaitingTime1[], double jobSystemTime1[],double jobPeakAge[]){
         for(int i=1;i<n;i++){
-            if(jobWaitingTime1[i]>0){
                 jobPeakAge[i]=jobSystemTime1[i]+(jobs1[i].jobArrivalTime-jobs1[i-1].jobArrivalTime);
-
-            }
+                System.out.println("jobPeakAge["+i+"]= "+ jobPeakAge[i]);
         }
     }
 
     static void findRequestPeakAge(Jobs request2[],int m,double requestWaitingTime2[],double requestSystemTime2[],double requestPeakAge[]){
         for(int i=1;i<m;i++){
-            if(requestWaitingTime2[i]>0){
                 requestPeakAge[i]=requestSystemTime2[i]+(request2[i].jobArrivalTime-request2[i-1].jobArrivalTime);
-            }
+            System.out.println("requestPeakAge["+i+"]= "+ requestPeakAge[i]);
         }
     }
 
     static void findJobAge(Jobs jobs1[],int n, double jobFinishTime[],double jobAge[],double jobWaitingTime[]){
         for(int i=1;i<n;i++){
-            if(jobWaitingTime[i]>0){
+            if(jobFinishTime[i]>0){
                 jobAge[i]=0.5*(jobs1[i].jobArrivalTime-jobs1[i-1].jobArrivalTime)*(2*jobFinishTime[i]-jobs1[i].jobArrivalTime-jobs1[i-1].jobArrivalTime);
             }
+            System.out.println("jobAge["+i+"]= "+ jobAge[i]);
+            System.out.println("jobFinishTime["+i+ "]= "+jobFinishTime[i]);
+
         }
     }
 
     static void findRequestAge(Jobs request[], int m, double requestFinishTime[],double requestAge[],double requestWaitingTime[]){
         for(int i=1;i<m;i++){
-            if(requestWaitingTime[i]>0){
+            if(requestFinishTime[i]>0){
                 requestAge[i]=0.5*(request[i].jobArrivalTime-request[i-1].jobArrivalTime)*(2*requestFinishTime[i]-request[i].jobArrivalTime-request[i-1].jobArrivalTime);
             }
+            System.out.println("requestAge["+i+"]= "+requestAge[i]);
+            System.out.println("requestFinishTime["+i+"]= "+ requestFinishTime[i]);
         }
     }
 
@@ -266,8 +262,8 @@ public class TwoQueue {
         int RQI = 0, JQI=0;
         int currentJob = 0, currentRequest = 0;
         double Time = 0, finishTime = 0;//preJobFinishTime=0,preRequestFinishTime=0;
-        boolean checkJobQueue = false;
-        boolean checkRequestQueue = false;
+        //boolean checkJobQueue = false;
+        //boolean checkRequestQueue = false;
 
 
         double jobServiceTime1[] = new double[jobs1.length];
@@ -325,7 +321,7 @@ public class TwoQueue {
                     //System.out.println("finishTime="+finishTime);
                     requestFinishTime2[currentRequest] = finishTime;
                     requestWaitingTime2[currentRequest] = finishTime - request2[currentRequest].jobArrivalTime - request2[currentRequest].jobServiceTime;
-                   // System.out.println("requestWaitingTime2["+currentRequest+"]="+ requestWaitingTime2[currentRequest] );
+                    //System.out.println("requestWaitingTime2["+currentRequest+"]="+ requestWaitingTime2[currentRequest] );
 
                     if(currentRequest<request2.length-1){
                         currentRequest++;
